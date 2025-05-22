@@ -6,13 +6,13 @@ import path from "path";
 import * as fs from "fs";
 import * as ai from "./ai";
 
-import { 
-  insertDocumentSchema, 
-  insertTagSchema, 
-  insertDocumentTagSchema, 
+import {
+  insertDocumentSchema,
+  insertTagSchema,
+  insertDocumentTagSchema,
   insertRedactionSchema,
   insertProductionSetSchema,
-  insertProductionDocumentSchema
+  insertProductionDocumentSchema,
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -469,6 +469,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Review Protocol endpoints
+  app.get("/api/protocols", async (_req: Request, res: Response) => {
+    try {
+      const protocols = await storage.getAllProtocols();
+      res.json(protocols);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch protocols" });
+    }
+  });
+
+  app.get("/api/protocols/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid protocol ID" });
+      }
+
+      const protocol = await storage.getProtocol(id);
+      if (!protocol) {
+        return res.status(404).json({ message: "Protocol not found" });
+      }
+
+      res.json(protocol);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch protocol" });
+    }
+  });
+
+  app.post("/api/protocols", upload.single("file"), async (req: Request, res: Response) => {
+    try {
+      let { name = "" , content = "" } = req.body;
+
+      if (req.file) {
+        const filePath = path.join(process.cwd(), 'uploads', req.file.filename);
+        content = fs.readFileSync(filePath, 'utf8');
+        if (!name) {
+          name = req.file.originalname;
+        }
+      }
+
+      if (!name || !content) {
+        return res.status(400).json({ message: "Protocol name and content are required" });
+      }
+
+      const protocol = await storage.createProtocol({ name, content });
+      res.status(201).json(protocol);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create protocol" });
+    }
+  });
+
+  app.delete("/api/protocols/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid protocol ID" });
+      }
+
+      const success = await storage.deleteProtocol(id);
+      if (success) {
+        res.status(204).end();
+      } else {
+        res.status(500).json({ message: "Failed to delete protocol" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete protocol" });
+    }
+  });
+
   // Tag endpoints
   app.get("/api/tags", async (req: Request, res: Response) => {
     try {
@@ -747,6 +816,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/ai/extract-entities", async (req: Request, res: Response) => {
     await ai.extractEntities(req, res);
+  });
+
+  app.post("/api/ai/suggest-coding", async (req: Request, res: Response) => {
+    await ai.suggestCoding(req, res);
   });
 
   app.get("/api/documents/:id/download", async (req: Request, res: Response) => {

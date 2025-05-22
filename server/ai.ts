@@ -209,3 +209,46 @@ export async function extractEntities(req: Request, res: Response) {
     });
   }
 }
+
+/**
+ * Suggest coding decisions using a review protocol
+ */
+export async function suggestCoding(req: Request, res: Response) {
+  const { content, protocol } = req.body;
+
+  if (!content || typeof content !== 'string' || !protocol || typeof protocol !== 'string') {
+    return res.status(400).json({
+      error: 'Content and protocol are required and must be strings'
+    });
+  }
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'system',
+          content: `You are assisting with legal document review. Follow the provided review protocol to suggest coding options such as responsiveness, privilege, or confidentiality.`,
+        },
+        {
+          role: 'user',
+          content: `Review Protocol:\n${protocol}\n\nDocument Content:\n${content}`,
+        },
+      ],
+      max_tokens: 1000,
+      temperature: 0.3,
+      response_format: { type: 'json_object' },
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || '{}');
+    const suggestions = Array.isArray(result.suggestions) ? result.suggestions : result;
+
+    res.status(200).json({ suggestions });
+  } catch (error: any) {
+    console.error('Error suggesting coding:', error);
+    res.status(500).json({
+      error: 'Failed to suggest coding',
+      details: error.message || 'Unknown error',
+    });
+  }
+}

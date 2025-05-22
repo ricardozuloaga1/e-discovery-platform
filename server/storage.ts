@@ -1,12 +1,13 @@
 // Import necessary types
-import { 
-  User, InsertUser, 
-  Document, InsertDocument, 
-  Tag, InsertTag, 
-  DocumentTag, InsertDocumentTag, 
-  Redaction, InsertRedaction, 
-  ProductionSet, InsertProductionSet, 
-  ProductionDocument, InsertProductionDocument 
+import {
+  User, InsertUser,
+  Document, InsertDocument,
+  Tag, InsertTag,
+  DocumentTag, InsertDocumentTag,
+  Redaction, InsertRedaction,
+  ProductionSet, InsertProductionSet,
+  ProductionDocument, InsertProductionDocument,
+  ReviewProtocol, InsertReviewProtocol,
 } from '@shared/schema';
 
 // Define the storage interface
@@ -47,6 +48,12 @@ export interface IStorage {
   // Production Document operations
   getProductionDocuments(productionSetId: number): Promise<{ document: Document, batesNumber: string }[]>;
   addDocumentToProductionSet(productionDocument: InsertProductionDocument): Promise<ProductionDocument>;
+
+  // Review Protocol operations
+  getAllProtocols(): Promise<ReviewProtocol[]>;
+  getProtocol(id: number): Promise<ReviewProtocol | undefined>;
+  createProtocol(protocol: InsertReviewProtocol): Promise<ReviewProtocol>;
+  deleteProtocol(id: number): Promise<boolean>;
 }
 
 // Import our DatabaseStorage implementation
