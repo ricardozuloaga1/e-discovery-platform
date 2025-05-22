@@ -62,6 +62,38 @@ A cutting-edge e-discovery platform leveraging AI to transform document analysis
 3. **Apply Redactions**: Use the redaction tools to hide sensitive information
 4. **Create Productions**: Generate production sets with Bates numbering
 
+## Review Protocol API
+
+Manage review protocols and use AI to suggest coding decisions.
+
+### Upload a Protocol
+
+Send a `POST` request to `/api/protocols` with JSON describing the protocol:
+
+```bash
+curl -X POST http://localhost:3000/api/protocols \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Default","instructions":"How to code","codes":["Responsive","Privileged"]}'
+```
+
+### Fetch or Delete Protocols
+
+- `GET /api/protocols` – list all protocols
+- `GET /api/protocols/:id` – retrieve a specific protocol
+- `DELETE /api/protocols/:id` – remove a protocol
+
+### AI Coding Suggestions
+
+Request coding suggestions for a document by sending its text to `/api/ai/suggest-coding`:
+
+```bash
+curl -X POST http://localhost:3000/api/ai/suggest-coding \
+  -H "Content-Type: application/json" \
+  -d '{"content":"Document text to analyze"}'
+```
+
+The response contains the recommended codes based on the active protocol.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
