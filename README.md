@@ -8,6 +8,8 @@ A cutting-edge e-discovery platform leveraging AI to transform document analysis
 - **AI-Powered Analysis**: Automatic summarization, PII detection, and entity extraction
 - **Document Viewer**: Review documents with advanced redaction capabilities
 - **Tagging System**: Organize documents with custom tags and categories
+- **Protocol-Driven Coding**: Upload review protocols to guide AI tagging
+- **Database Storage**: Persist documents and metadata in PostgreSQL
 - **Production Tools**: Generate production sets with Bates stamping
 
 ## Technology Stack

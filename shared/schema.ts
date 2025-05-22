@@ -175,3 +175,19 @@ export const productionDocumentsRelations = relations(productionDocuments, ({ on
     references: [documents.id]
   })
 }));
+
+// ReviewProtocols table for protocol-driven coding
+export const reviewProtocols = pgTable("review_protocols", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  content: text("content").notNull(),
+  uploadedAt: timestamp("uploaded_at").defaultNow().notNull(),
+});
+
+export const insertReviewProtocolSchema = createInsertSchema(reviewProtocols).omit({
+  id: true,
+  uploadedAt: true,
+});
+
+export type InsertReviewProtocol = z.infer<typeof insertReviewProtocolSchema>;
+export type ReviewProtocol = typeof reviewProtocols.$inferSelect;

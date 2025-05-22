@@ -6,7 +6,8 @@ import {
   DocumentTag, InsertDocumentTag, documentTags,
   Redaction, InsertRedaction, redactions,
   ProductionSet, InsertProductionSet, productionSets,
-  ProductionDocument, InsertProductionDocument, productionDocuments
+  ProductionDocument, InsertProductionDocument, productionDocuments,
+  ReviewProtocol, InsertReviewProtocol, reviewProtocols
 } from '@shared/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import { IStorage } from './storage';
@@ -191,5 +192,25 @@ export class DatabaseStorage implements IStorage {
       .values(insertProductionDocument)
       .returning();
     return productionDocument;
+  }
+
+  // Review Protocol operations
+  async getAllProtocols(): Promise<ReviewProtocol[]> {
+    return await db.select().from(reviewProtocols).orderBy(desc(reviewProtocols.uploadedAt));
+  }
+
+  async getProtocol(id: number): Promise<ReviewProtocol | undefined> {
+    const [protocol] = await db.select().from(reviewProtocols).where(eq(reviewProtocols.id, id));
+    return protocol || undefined;
+  }
+
+  async createProtocol(insertProtocol: InsertReviewProtocol): Promise<ReviewProtocol> {
+    const [protocol] = await db.insert(reviewProtocols).values(insertProtocol).returning();
+    return protocol;
+  }
+
+  async deleteProtocol(id: number): Promise<boolean> {
+    const [deleted] = await db.delete(reviewProtocols).where(eq(reviewProtocols.id, id)).returning();
+    return !!deleted;
   }
 }
